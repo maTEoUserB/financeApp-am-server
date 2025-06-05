@@ -8,7 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.finances.finances_app.repositories.AccountRepository;
 import pl.finances.finances_app.repositories.entities.AccountEntity;
 import java.util.Optional;
-import org.springframework.security.oauth2.jwt.Jwt;
+//import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * Provides business logic for managing users in the system.
@@ -39,27 +41,18 @@ public class UserService {
         this.budgetService = budgetService;
     }
 
-    private AccountEntity getOrCreateUserAccount(String username){
-        return userRepository.findByUsername(username).orElseGet(()-> {
-            AccountEntity userAccount = new AccountEntity(username, 0.0, "USER");
-            AccountEntity newUserAccount = userRepository.save(userAccount);
-            userRepository.flush();
-
-            budgetService.createDefaultBudgets(userAccount);
-
-            return newUserAccount;
-        });
+    public AccountEntity getUserAccount() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        AccountEntity account = userRepository.findEntityByUsername(username);
+        if (account == null) {
+            throw new EntityNotFoundException("User not found");
+        }
+        return account;
     }
 
-    public long getUserAccountId(Jwt jwt){
-        String username = jwt.getClaimAsString("preferred_username");
-        AccountEntity userAccount = getOrCreateUserAccount(username);
-
-        if(userAccount == null){
-            throw new EntityNotFoundException("User entity not found.");
-        }
-
-        return userAccount.getId();
+    public long getUserAccountId() {
+        return getUserAccount().getId();
     }
 
     public Double getUserSaldo(long id){
@@ -68,9 +61,5 @@ public class UserService {
 
     public Optional<AccountEntity> findUserById(long id) {
         return userRepository.findById(id);
-    }
-
-    public boolean existsUserByUsername(String username) {
-        return userRepository.existsByUsername(username);
     }
 }

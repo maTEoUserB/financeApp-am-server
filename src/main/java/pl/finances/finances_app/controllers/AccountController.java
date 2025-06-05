@@ -3,8 +3,6 @@ package pl.finances.finances_app.controllers;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import pl.finances.finances_app.dto.IndexDTO;
 import pl.finances.finances_app.dto.SummaryDTO;
@@ -32,33 +30,30 @@ public class AccountController {
     /**
      * Get main information about logged-in user account.
      *
-     * @param jwt the authenticated user's JWT token
      * @return the IndexDTO with information like balance, weekly expenses or savings balance.
      */
     @GetMapping("/index")
-    ResponseEntity<IndexDTO> index(@AuthenticationPrincipal Jwt jwt) {
-        return accountService.getMainAccountInformation(jwt);
+    ResponseEntity<IndexDTO> index() {
+        return accountService.getMainAccountInformation();
     }
 
     /**
      * Get a summary of expenses and income.
      *
-     * @param jwt the authenticated user's JWT token
      * @return the SummaryDTO with information like average income, total expenses or biggest expense.
      */
     @GetMapping("/summary")
-    ResponseEntity<SummaryDTO> getAccountSummary(@AuthenticationPrincipal Jwt jwt){
-        return accountService.getAccountSummary(jwt);
+    ResponseEntity<SummaryDTO> getAccountSummary(){
+        return accountService.getAccountSummary();
     }
 
     /**
      * Set saldo of user account.
      *
-     * @param jwt the authenticated user's JWT token
      * @return the SaldoDTO with amount of saldo.
      */
     @PostMapping("/saldo")
-    ResponseEntity<SaldoDTO> setFirsSaldo(@AuthenticationPrincipal Jwt jwt, @RequestBody @Valid SaldoDTO saldo){
-        return accountService.setFirstSaldo(jwt, saldo);
+    ResponseEntity<SaldoDTO> setFirsSaldo(@RequestBody @Valid SaldoDTO saldo){
+        return accountService.setFirstSaldo(saldo);
     }
 }

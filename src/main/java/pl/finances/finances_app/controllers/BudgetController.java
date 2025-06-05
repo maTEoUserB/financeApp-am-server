@@ -2,8 +2,6 @@ package pl.finances.finances_app.controllers;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,12 +29,11 @@ public class BudgetController {
     /**
      * Create new budget for category.
      *
-     * @param jwt the authenticated user's JWT token
      * @param createDto with id of category and limit amount
      * @return a BudgetDTO object
      */
     @PostMapping("/new/budget")
-    ResponseEntity<BudgetDTO> addBudget(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateBudgetDTO createDto) {
-        return budgetService.addNewBudget(jwt, createDto);
+    ResponseEntity<BudgetDTO> addBudget(@Valid @RequestBody CreateBudgetDTO createDto) {
+        return budgetService.addNewBudget(createDto);
     }
 }

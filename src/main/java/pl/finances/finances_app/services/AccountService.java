@@ -11,7 +11,6 @@ import pl.finances.finances_app.dto.requestsAndResponsesDto.SaldoDTO;
 import pl.finances.finances_app.repositories.AccountRepository;
 import pl.finances.finances_app.repositories.TransactionRepository;
 import pl.finances.finances_app.repositories.entities.AccountEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
@@ -54,11 +53,8 @@ public class AccountService {
     }
 
     @Transactional
-    public ResponseEntity<IndexDTO> getMainAccountInformation(Jwt jwt) {
-
-        String username = jwt.getClaimAsString("preferred_username");
-        boolean isNew = !userService.existsUserByUsername(username);
-        long id = userService.getUserAccountId(jwt);
+    public ResponseEntity<IndexDTO> getMainAccountInformation() {
+        long id = userService.getUserAccountId();
 
         double saldo = userService.getUserSaldo(id);
         double savingsBalance = savingsGoalService.getCurrentSavingsBalance(id);
@@ -74,15 +70,15 @@ public class AccountService {
         List<LastTransactionsDTO> lastTransactions = transactionService.findLatestTransactions(id);
 
         IndexDTO response = new IndexDTO(saldo, euroSaldo, usdSaldo, weeklyExpenses, meanOfWeeklyExpenses, weeklyChange,
-                topCategories, savingsBalance, savingsBalanceEuro, nearestObligations, lastTransactions, isNew);
+                topCategories, savingsBalance, savingsBalanceEuro, nearestObligations, lastTransactions);
 
         return ResponseEntity.ok(response);
     }
 
     @Transactional
-    public ResponseEntity<SummaryDTO> getAccountSummary(Jwt jwt) {
+    public ResponseEntity<SummaryDTO> getAccountSummary() {
 
-        long id = userService.getUserAccountId(jwt);
+        long id = userService.getUserAccountId();
 
         List<DailyExpensesDTO> lastWeekExpenses = transactionService.getLast7DaysExpenses(id);
         Double averageThisWeek = transactionService.getMeanOfWeeklyExpenses(id);
@@ -105,10 +101,9 @@ public class AccountService {
     }
 
     @Transactional
-    public ResponseEntity<SaldoDTO> setFirstSaldo(Jwt jwt, SaldoDTO saldo) {
+    public ResponseEntity<SaldoDTO> setFirstSaldo(SaldoDTO saldo) {
 
-        long id = userService.getUserAccountId(jwt);
-        AccountEntity userAccount = userService.findUserById(id).get();
+        AccountEntity userAccount = userService.getUserAccount();
         userAccount.setSaldo(saldo.getSaldoAmount());
         accountRepository.save(userAccount);
 

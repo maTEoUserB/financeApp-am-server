@@ -4,8 +4,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import pl.finances.finances_app.dto.LastTransactionsDTO;
 import pl.finances.finances_app.dto.requestsAndResponsesDto.CreateTransactionDTO;
@@ -36,31 +34,28 @@ public class TransactionController {
     /**
      * Create new transaction.
      *
-     * @param jwt the authenticated user's JWT token
      * @param createDto with id of category and limit amount
      * @return a TransactionDTO object
      */
     @PostMapping("/new/transaction")
-    ResponseEntity<TransactionDTO> createTransaction(@AuthenticationPrincipal Jwt jwt, @RequestBody @Valid CreateTransactionDTO createDto) {
-        return transactionService.createNewTransaction(jwt, createDto);
+    ResponseEntity<TransactionDTO> createTransaction(@RequestBody @Valid CreateTransactionDTO createDto) {
+        return transactionService.createNewTransaction(createDto);
     }
 
     /**
      * Get all transactions.
      *
-     * @param jwt the authenticated user's JWT token
      * @return a list of the LastTransactionsDTO
      */
     @GetMapping("/transactions")
-    ResponseEntity<List<LastTransactionsDTO>> getTransactions(@AuthenticationPrincipal Jwt jwt) {
-        return transactionService.getAllTransactions(jwt);
+    ResponseEntity<List<LastTransactionsDTO>> getTransactions() {
+        return transactionService.getAllTransactions();
     }
 
     /**
      * Retrieves a filtered list of transactions based on optional query parameters.
      * Filters can include transaction type, category list, amount range, and date range.
      *
-     * @param jwt the authenticated user's JWT token
      * @param type the type of transaction (e.g., "INCOME", "EXPENSE") [optional]
      * @param categories a list of category names to filter by [optional]
      * @param startAmount the minimum transaction amount to include [optional]
@@ -71,7 +66,6 @@ public class TransactionController {
      */
     @GetMapping("/transactions/filter")
     ResponseEntity<List<LastTransactionsDTO>> filterAndGetTransactions(
-            @AuthenticationPrincipal Jwt jwt,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) List<String> categories,
             @RequestParam(required = false) Double startAmount,
@@ -79,18 +73,17 @@ public class TransactionController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ){
-        return transactionService.filterAndGetTransactions(jwt, type, categories, startAmount, endAmount, startDate, endDate);
+        return transactionService.filterAndGetTransactions(type, categories, startAmount, endAmount, startDate, endDate);
     }
 
     /**
      * Delete an transaction.
      *
-     * @param jwt the authenticated user's JWT token
      * @param id the ID of the transaction to delete
      * @return no content ResponseEntity
      */
     @DeleteMapping("/transaction/delete/{id}")
-    ResponseEntity<?> deleteTransactions(@AuthenticationPrincipal Jwt jwt,  @PathVariable long id) {
-        return transactionService.deleteTransaction(jwt, id);
+    ResponseEntity<?> deleteTransactions(@PathVariable long id) {
+        return transactionService.deleteTransaction(id);
     }
 }

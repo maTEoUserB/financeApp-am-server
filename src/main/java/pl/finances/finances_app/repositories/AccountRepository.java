@@ -12,6 +12,7 @@ public interface AccountRepository extends JpaRepository<AccountEntity, Long> {
     boolean existsById(Long id);
     Optional<AccountEntity> findById(Long id);
     Optional<AccountEntity> findByUsername(String username);
+    AccountEntity findEntityByUsername(String username);
     void deleteById(Long id);
     boolean existsByUsername(String username);
 }

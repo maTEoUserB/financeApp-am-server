@@ -5,7 +5,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,15 +42,14 @@ public class BudgetService {
     }
 
     @Transactional
-    public ResponseEntity<BudgetDTO> addNewBudget(Jwt jwt, @Valid CreateBudgetDTO createDto) {
-        long id = userService.getUserAccountId(jwt);
-        AccountEntity userAccount = userService.findUserById(id).get();
+    public ResponseEntity<BudgetDTO> addNewBudget(@Valid CreateBudgetDTO createDto) {
+        AccountEntity userAccount = userService.getUserAccount();
         BudgetEntity budgetEntity = budgetRepository.findBudgetEntitiesByCategory_IdAndUserAccount(createDto.getCategoryId(), userAccount);
 
         if (budgetEntity == null) {
             throw new EntityNotFoundException("Budget entity not found");
         }
-        if (budgetEntity.getUserAccount().getId() != id) {
+        if (budgetEntity.getUserAccount().getId() != userAccount.getId()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to update this budget.");
         }
 
