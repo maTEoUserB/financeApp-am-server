@@ -31,6 +31,12 @@ public class AccountEntity {
     private String username;
 
     /**
+     * Password of owner of the account.
+     */
+    @Column(nullable = false)
+    private String password;
+
+    /**
      * LocalDate when the account was created in the system.
      * Automatically set during entity creation.
      */
@@ -61,8 +67,9 @@ public class AccountEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userAccount")
     private Set<BudgetEntity> budgets;
 
-    public AccountEntity(@NotNull String username,@NotNull double saldo, @NotNull String role) {
+    public AccountEntity(@NotNull String username, @NotNull String password, @NotNull double saldo, @NotNull String role) {
         this.username = username;
+        this.password = password;
         this.saldo = saldo;
         this.role = role;
         createdAt = LocalDate.now();

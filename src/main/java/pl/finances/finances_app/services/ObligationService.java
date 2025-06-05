@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -54,10 +53,9 @@ public class ObligationService {
     }
 
     @Transactional
-    public ResponseEntity<ObligationDTO> createNewObligation(Jwt jwt, CreateObligationDTO createDto) {
+    public ResponseEntity<ObligationDTO> createNewObligation(CreateObligationDTO createDto) {
 
-        long id = userService.getUserAccountId(jwt);
-        AccountEntity userAccount = userService.findUserById(id).get();
+        AccountEntity userAccount = userService.getUserAccount();
         CategoryEntity category = categoryService.findCategoryById(createDto.getCategoryId()).orElseThrow(() -> new EntityNotFoundException("Category not found."));
 
         ObligationEntity newObligation = new ObligationEntity(userAccount, createDto.getTitle(), createDto.getAmount(),
@@ -71,9 +69,9 @@ public class ObligationService {
     }
 
     @Transactional
-    public ResponseEntity<AllObligationsDTO> getObligations(Jwt jwt) {
+    public ResponseEntity<AllObligationsDTO> getObligations() {
 
-        long id = userService.getUserAccountId(jwt);
+        long id = userService.getUserAccountId();
 
         List<NearestObligationsDTO> paidObligations = obligationRepository.findObligations(id, true);
         List<NearestObligationsDTO> unpaidObligations = obligationRepository.findObligations(id, false);
@@ -96,19 +94,19 @@ public class ObligationService {
     }
 
     @Transactional
-    public ResponseEntity<ObligationDTO> updateObligation(Jwt jwt, Long id) {
+    public ResponseEntity<ObligationDTO> updateObligation(Long id) {
         ObligationEntity obligation = obligationRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Obligation not found."));
 
         if(obligation.isDone()){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Obligation is already done");
         }
-        if(obligation.getUserAccount().getId() != userService.getUserAccountId(jwt)){
+        if(obligation.getUserAccount().getId() != userService.getUserAccountId()){
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to update this obligation.");
         }
 
         obligation.setDone(true);
         obligationRepository.save(obligation);
-        createTransactionFromObligation(jwt, obligation);
+        createTransactionFromObligation(obligation);
 
         ObligationDTO response = new ObligationDTO(obligation.getObligationTitle(), obligation.getObligationAmount(), obligation.getDateToPay(), obligation.getCategory().getId());
 
@@ -116,9 +114,9 @@ public class ObligationService {
     }
 
     @Transactional
-    protected void createTransactionFromObligation(Jwt jwt, ObligationEntity obligation) {
+    protected void createTransactionFromObligation(ObligationEntity obligation) {
         LocalDateTime now = LocalDateTime.now();
         CreateTransactionDTO createDto = new CreateTransactionDTO(obligation.getObligationTitle(), obligation.getObligationAmount(), "", obligation.getCategory().getId(), "expense", now);
-        transactionService.createNewTransaction(jwt, createDto);
+        transactionService.createNewTransaction(createDto);
     }
 }

@@ -4,7 +4,6 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -43,9 +42,8 @@ public class SavingsGoalService {
     }
 
     @Transactional
-    public ResponseEntity<SavingsGoalDTO> createNewSavingsGoal(Jwt jwt, CreateSavingsGoalDTO createDto){
-        long id = userService.getUserAccountId(jwt);
-        AccountEntity userAccount = userService.findUserById(id).get();
+    public ResponseEntity<SavingsGoalDTO> createNewSavingsGoal(CreateSavingsGoalDTO createDto){
+        AccountEntity userAccount = userService.getUserAccount();
 
         SavingsGoalEntity newGoal = new SavingsGoalEntity(createDto.getTitle(), userAccount, createDto.getCurrentAmount(), createDto.getFinalAmount(), createDto.getDeadline());
         savingsGoalRepository.save(newGoal);
@@ -72,8 +70,8 @@ public class SavingsGoalService {
     }
 
     @Transactional
-    public ResponseEntity<List<SavingsGoalToList>> getAllSavingsGoal(Jwt jwt) {
-        long id = userService.getUserAccountId(jwt);
+    public ResponseEntity<List<SavingsGoalToList>> getAllSavingsGoal() {
+        long id = userService.getUserAccountId();
 
         List<SavingsGoalToList> savingsGoals = new ArrayList<>();
         savingsGoalRepository.findAllByUserAccount_Id(id).forEach(sg -> savingsGoals.add(new SavingsGoalToList(sg.getId(), sg.getGoalTitle(),
@@ -83,11 +81,11 @@ public class SavingsGoalService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteSavingGoalById(Jwt jwt, long id) {
+    public ResponseEntity<?> deleteSavingGoalById(long id) {
         if(!savingsGoalRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-        long userId = userService.getUserAccountId(jwt);
+        long userId = userService.getUserAccountId();
 
         if(savingsGoalRepository.findById(id).get().getUserAccount().getId() != userId) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to delete this savings goal.");
@@ -98,10 +96,10 @@ public class SavingsGoalService {
     }
 
     @Transactional
-    public ResponseEntity<SavingsGoalDTO> updateSavingGoal(Jwt jwt, long id, Map<String, Object> updates) {
+    public ResponseEntity<SavingsGoalDTO> updateSavingGoal(long id, Map<String, Object> updates) {
         SavingsGoalEntity savingsGoal = savingsGoalRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Savings goal not found."));
 
-        long userId = userService.getUserAccountId(jwt);
+        long userId = userService.getUserAccountId();
         if(savingsGoal.getUserAccount().getId() != userId) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to update this savings goal.");
         }

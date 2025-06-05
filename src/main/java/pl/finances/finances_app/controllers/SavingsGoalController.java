@@ -3,8 +3,6 @@ package pl.finances.finances_app.controllers;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import pl.finances.finances_app.dto.requestsAndResponsesDto.CreateSavingsGoalDTO;
 import pl.finances.finances_app.dto.requestsAndResponsesDto.SavingsGoalDTO;
@@ -35,48 +33,44 @@ public class SavingsGoalController {
     /**
      * Create new savings goal.
      *
-     * @param jwt the authenticated user's JWT token
      * @param createDto with id of category and limit amount
      * @return a SavingsGoalDTO object
      */
     @PostMapping("/new/savings_goal")
-    ResponseEntity<SavingsGoalDTO> createSavingsGoal(@AuthenticationPrincipal Jwt jwt, @RequestBody @Valid CreateSavingsGoalDTO createDto) {
-        return savingsGoalService.createNewSavingsGoal(jwt, createDto);
+    ResponseEntity<SavingsGoalDTO> createSavingsGoal(@RequestBody @Valid CreateSavingsGoalDTO createDto) {
+        return savingsGoalService.createNewSavingsGoal(createDto);
     }
 
     /**
      * Get all savings goals.
      *
-     * @param jwt the authenticated user's JWT token
      * @return a list of the SavingsGoalToList
      */
     @GetMapping("/savings/goals")
-    ResponseEntity<List<SavingsGoalToList>> getAllSavingsGoal(@AuthenticationPrincipal Jwt jwt) {
-        return savingsGoalService.getAllSavingsGoal(jwt);
+    ResponseEntity<List<SavingsGoalToList>> getAllSavingsGoal() {
+        return savingsGoalService.getAllSavingsGoal();
     }
 
     /**
      * Delete an savings goal.
      *
-     * @param jwt the authenticated user's JWT token
      * @param id the ID of the savings goal to delete
      * @return no content ResponseEntity
      */
     @DeleteMapping("/saving_goal/delete/{id}")
-    ResponseEntity<?> deleteSavingsGoal(@AuthenticationPrincipal Jwt jwt, @PathVariable long id) {
-        return savingsGoalService.deleteSavingGoalById(jwt, id);
+    ResponseEntity<?> deleteSavingsGoal(@PathVariable long id) {
+        return savingsGoalService.deleteSavingGoalById(id);
     }
 
     /**
      * Update an savings goal.
      *
-     * @param jwt the authenticated user's JWT token
      * @param id the ID of the savings goal to update
      * @param updates with objects to update
      * @return the SavingsGoalDTO
      */
     @PatchMapping("/saving_goal/update/{id}")
-    ResponseEntity<SavingsGoalDTO> updateSavingGoal(@AuthenticationPrincipal Jwt jwt, @PathVariable long id, @RequestBody Map<String, Object> updates){
-        return savingsGoalService.updateSavingGoal(jwt, id, updates);
+    ResponseEntity<SavingsGoalDTO> updateSavingGoal(@PathVariable long id, @RequestBody Map<String, Object> updates){
+        return savingsGoalService.updateSavingGoal(id, updates);
     }
 }

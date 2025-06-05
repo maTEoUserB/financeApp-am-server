@@ -1,8 +1,6 @@
 package pl.finances.finances_app.controllers;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import pl.finances.finances_app.dto.CategorySummaryDTO;
@@ -56,11 +54,10 @@ public class CategoryController {
     /**
      * Get summary information about expenditure information by category.
      *
-     * @param jwt the authenticated user's JWT token
      * @return the list of CategorySummaryDTO.
      */
     @GetMapping("/expense/categories/summary")
-    ResponseEntity<List<CategorySummaryDTO>> getExpenseCategoriesSummary(@AuthenticationPrincipal Jwt jwt){
-        return transactionService.findExpenseCategoriesSummary(jwt);
+    ResponseEntity<List<CategorySummaryDTO>> getExpenseCategoriesSummary(){
+        return transactionService.findExpenseCategoriesSummary();
     }
 }

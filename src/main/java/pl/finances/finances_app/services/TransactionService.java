@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -48,9 +47,8 @@ public class TransactionService {
     }
 
     @Transactional
-    public ResponseEntity<TransactionDTO> createNewTransaction(Jwt jwt, CreateTransactionDTO transaction) {
-        long id = userService.getUserAccountId(jwt);
-        AccountEntity userAccount = userService.findUserById(id).get();
+    public ResponseEntity<TransactionDTO> createNewTransaction(CreateTransactionDTO transaction) {
+        AccountEntity userAccount = userService.getUserAccount();
 
         CategoryEntity category = categoryService.findCategoryById(transaction.getCategoryId()).orElseThrow(() -> new EntityNotFoundException("Category not found."));
         TransactionEntity newTransaction = new TransactionEntity(transaction.getTransactionTitle(), transaction.getTransactionAmount(), transaction.getTransactionDescription(),
@@ -67,17 +65,17 @@ public class TransactionService {
     }
 
     @Transactional
-    public ResponseEntity<List<LastTransactionsDTO>> getAllTransactions(Jwt jwt) {
-        long id = userService.getUserAccountId(jwt);
+    public ResponseEntity<List<LastTransactionsDTO>> getAllTransactions() {
+        long id = userService.getUserAccountId();
         List<LastTransactionsDTO> transactions = transactionRepository.getAllTransactions(id);
 
         return ResponseEntity.ok(transactions);
     }
 
     @Transactional
-    public ResponseEntity<List<LastTransactionsDTO>> filterAndGetTransactions(Jwt jwt, String type, List<String> categories,
+    public ResponseEntity<List<LastTransactionsDTO>> filterAndGetTransactions(String type, List<String> categories,
                                                                               Double startAmount, Double endAmount, LocalDate startDate, LocalDate endDate) {
-        long id = userService.getUserAccountId(jwt);
+        long id = userService.getUserAccountId();
 
         Double startAmountVal = (startAmount != null) ? startAmount : Double.MIN_VALUE;
         Double endAmountVal = (endAmount != null) ? endAmount : Double.MAX_VALUE;
@@ -96,12 +94,12 @@ public class TransactionService {
     }
 
     @Transactional
-    public ResponseEntity<?> deleteTransaction(Jwt jwt, long id) {
+    public ResponseEntity<?> deleteTransaction(long id) {
         if (!transactionRepository.existsById(id)) {
             throw new EntityNotFoundException("Transaction not found");
         }
 
-        long userId = userService.getUserAccountId(jwt);
+        long userId = userService.getUserAccountId();
         if (transactionRepository.findById(id).get().getUserAccount().getId() != userId) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You do not have permission to delete this transaction.");
         }
@@ -114,8 +112,8 @@ public class TransactionService {
     }
 
     @Transactional
-    public ResponseEntity<List<CategorySummaryDTO>> findExpenseCategoriesSummary(Jwt jwt) {
-        long id = userService.getUserAccountId(jwt);
+    public ResponseEntity<List<CategorySummaryDTO>> findExpenseCategoriesSummary() {
+        long id = userService.getUserAccountId();
         List<CategorySummaryDTO> categories = transactionRepository.findExpenseCategoriesSummary(id);
 
         return ResponseEntity.ok(categories);
