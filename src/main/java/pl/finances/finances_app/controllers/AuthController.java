@@ -1,6 +1,5 @@
 package pl.finances.finances_app.controllers;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.Authentication;
@@ -42,7 +41,6 @@ public class AuthController {
         if (accountRepository.existsByUsername(registerDTO.getUsername())) {
             return "Error: Username is already taken!";
         }
-        // Create new registerDTO's registerDTO
         AccountEntity newUser = new AccountEntity(
                 registerDTO.getUsername(),
                 encoder.encode(registerDTO.getPassword()),

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.finances.finances_app.dto.*;
 import pl.finances.finances_app.dto.projection.TransactionProjection;
+import pl.finances.finances_app.dto.requestsAndResponsesDto.BalanceDTO;
 import pl.finances.finances_app.dto.requestsAndResponsesDto.SaldoDTO;
 import pl.finances.finances_app.repositories.AccountRepository;
 import pl.finances.finances_app.repositories.TransactionRepository;
@@ -158,5 +159,15 @@ public class AccountService {
         }
 
         return weeklyChange;
+    }
+
+    public ResponseEntity<BalanceDTO> getbalance() {
+        AccountEntity userAccount = userService.getUserAccount();
+
+        Double saldo = Math.round(userAccount.getSaldo() * 100.0) / 100.0;
+        Double euroSaldo = Math.round(calculateEuroRateSaldo(saldo) * 100.0) / 100.0;
+        BalanceDTO balanceDto = new BalanceDTO(saldo, euroSaldo);
+
+        return ResponseEntity.ok(balanceDto);
     }
 }
