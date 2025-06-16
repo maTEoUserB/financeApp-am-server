@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.finances.finances_app.dto.IndexDTO;
 import pl.finances.finances_app.dto.SummaryDTO;
+import pl.finances.finances_app.dto.requestsAndResponsesDto.BalanceDTO;
 import pl.finances.finances_app.dto.requestsAndResponsesDto.SaldoDTO;
 import pl.finances.finances_app.services.AccountService;
 
@@ -32,6 +33,12 @@ public class AccountController {
      *
      * @return the IndexDTO with information like balance, weekly expenses or savings balance.
      */
+
+    @GetMapping("/balance")
+    ResponseEntity<BalanceDTO> getBalance() {
+        return accountService.getbalance();
+    }
+
     @GetMapping("/index")
     ResponseEntity<IndexDTO> index() {
         return accountService.getMainAccountInformation();
