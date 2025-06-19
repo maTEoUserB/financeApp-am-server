@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import pl.finances.finances_app.dto.LastTransactionsDTO;
 import pl.finances.finances_app.dto.requestsAndResponsesDto.CreateTransactionDTO;
 import pl.finances.finances_app.dto.requestsAndResponsesDto.TransactionDTO;
@@ -85,5 +86,16 @@ public class TransactionController {
     @DeleteMapping("/transaction/delete/{id}")
     ResponseEntity<?> deleteTransactions(@PathVariable long id) {
         return transactionService.deleteTransaction(id);
+    }
+
+    /**
+     * Add transaction from receipt.
+     *
+     * @param file
+     * @return no content ResponseEntity
+     */
+    @PostMapping("/transaction/from-receipt")
+    public ResponseEntity<TransactionDTO> handleReceipt(@RequestPart("file") MultipartFile file) {
+        return transactionService.createFromReceipt(file);
     }
 }

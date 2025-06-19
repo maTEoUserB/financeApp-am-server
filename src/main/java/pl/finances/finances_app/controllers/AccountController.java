@@ -4,11 +4,14 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.finances.finances_app.dto.DailyExpensesDTO;
 import pl.finances.finances_app.dto.IndexDTO;
 import pl.finances.finances_app.dto.SummaryDTO;
 import pl.finances.finances_app.dto.requestsAndResponsesDto.BalanceDTO;
 import pl.finances.finances_app.dto.requestsAndResponsesDto.SaldoDTO;
 import pl.finances.finances_app.services.AccountService;
+
+import java.util.List;
 
 /**
  * REST controller for managing users accounts.
@@ -62,5 +65,10 @@ public class AccountController {
     @PostMapping("/saldo")
     ResponseEntity<SaldoDTO> setFirsSaldo(@RequestBody @Valid SaldoDTO saldo){
         return accountService.setFirstSaldo(saldo);
+    }
+
+    @GetMapping("/weekly/expenses")
+    ResponseEntity<List<DailyExpensesDTO>> getWeeklyExpenses(){
+        return accountService.getWeeklyExpenses();
     }
 }
