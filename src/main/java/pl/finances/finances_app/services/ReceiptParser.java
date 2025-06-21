@@ -10,7 +10,6 @@ public class ReceiptParser {
     public ParsedReceipt parse(String rawText) {
         String[] lines = rawText.split("\\n");
 
-        // 1. Szukamy największej liczby (kwoty)
         double maxAmount = 0;
         for (String line : lines) {
             Matcher matcher = Pattern.compile("(\\d+[.,]\\d{2})").matcher(line);
@@ -22,7 +21,6 @@ public class ReceiptParser {
             }
         }
 
-        // 2. Pierwsza niepusta linia jako tytuł
         String title = "Zakup";
         for (String line : lines) {
             if (!line.trim().isEmpty()) {
