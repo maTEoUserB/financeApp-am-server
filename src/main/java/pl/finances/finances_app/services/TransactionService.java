@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import pl.finances.finances_app.dto.*;
 import pl.finances.finances_app.dto.projection.TransactionProjection;
@@ -31,6 +32,8 @@ public class TransactionService {
     private final UserService userService;
     private final TransactionRepository transactionRepository;
     private final CategoryService categoryService;
+    private final ReceiptOcrService receiptOcrService;
+    private final ReceiptParser receiptParser;
 
     /**
      * Constructs a new TransactionService with the required repository and services.
@@ -40,10 +43,12 @@ public class TransactionService {
      * @param categoryService the service for category data managing
      */
     @Autowired
-    public TransactionService(UserService userService, TransactionRepository transactionRepository, CategoryService categoryService) {
+    public TransactionService(UserService userService, TransactionRepository transactionRepository, CategoryService categoryService, ReceiptOcrService reiptOcrService, ReceiptParser receiptParser) {
         this.userService = userService;
         this.transactionRepository = transactionRepository;
         this.categoryService = categoryService;
+        this.receiptOcrService = reiptOcrService;
+        this.receiptParser = receiptParser;
     }
 
     @Transactional
@@ -61,7 +66,7 @@ public class TransactionService {
                 newTransaction.getTransactionDescription(), newTransaction.getCategory().getId(), newTransaction.getTransactionType(), newTransaction.getTransactionDate());
 
 
-        return ResponseEntity.created(URI.create("/new/transaction/" + newTransaction.getTransactionType())).body(dto);
+        return ResponseEntity.ok(dto);
     }
 
     @Transactional
@@ -187,4 +192,22 @@ public class TransactionService {
     public TransactionProjection findMaxWeeklyExpense(long id) {
         return transactionRepository.findMaxWeeklyExpense(id);
     }
+
+    @Transactional
+    public ResponseEntity<TransactionDTO> createFromReceipt(MultipartFile file) {
+        try {
+            String rawText = receiptOcrService.extractTextFromImage(file);
+
+            ReceiptParser.ParsedReceipt parsed = receiptParser.parse(rawText);
+
+            CreateTransactionDTO createTransactionDTO = new CreateTransactionDTO(parsed.title(), parsed.amount(), "Transakcja z paragonu", 15, "expense", LocalDateTime.now());
+
+            return createNewTransaction(createTransactionDTO);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Błąd przy przetwarzaniu paragonu", e);
+        }
+    }
+
 }
+

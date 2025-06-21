@@ -170,4 +170,12 @@ public class AccountService {
 
         return ResponseEntity.ok(balanceDto);
     }
+
+    public ResponseEntity<List<DailyExpensesDTO>> getWeeklyExpenses() {
+        long id = userService.getUserAccountId();
+
+        List<DailyExpensesDTO> lastWeekExpenses = transactionService.getLast7DaysExpenses(id);
+
+        return ResponseEntity.ok(lastWeekExpenses);
+    }
 }
